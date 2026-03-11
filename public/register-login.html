@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Registrace / Login</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body {
+    font-family: Arial, sans-serif;
+    max-width: 400px;
+    margin: 50px auto;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+header button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+h2 {
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+button.submit {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+p.message {
+    text-align: center;
+    color: red;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <button id="toggleAuth">Přejít na Login</button>
+</header>
+
+<h2 id="formTitle">Registrace</h2>
+
+<div id="message" class="message"></div>
+
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+
+<button class="submit" id="submitBtn">Registrovat</button>
+
+<script>
+let isRegister = true
+
+const toggleBtn = document.getElementById("toggleAuth")
+const formTitle = document.getElementById("formTitle")
+const submitBtn = document.getElementById("submitBtn")
+const message = document.getElementById("message")
+
+toggleBtn.addEventListener("click", () => {
+    isRegister = !isRegister
+    if (isRegister) {
+        formTitle.innerText = "Registrace"
+        submitBtn.innerText = "Registrovat"
+        toggleBtn.innerText = "Přejít na Login"
+    } else {
+        formTitle.innerText = "Login"
+        submitBtn.innerText = "Přihlásit se"
+        toggleBtn.innerText = "Přejít na Registraci"
+    }
+    message.innerText = ""
+})
+
+submitBtn.addEventListener("click", async () => {
+    const username = document.getElementById("username").value
+    const password = document.getElementById("password").value
+
+    if (!username || !password) {
+        message.innerText = "Vyplňte všechny údaje"
+        return
+    }
+
+    const endpoint = isRegister ? "/register" : "/login"
+
+    try {
+        const res = await fetch(endpoint, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({username,password})
+        })
+        const data = await res.json()
+        if (data.message) {
+            if (isRegister) {
+                message.style.color = "green"
+                message.innerText = "Registrace úspěšná! Přihlašte se."
+                // přepni automaticky na login
+                toggleBtn.click()
+            } else {
+                window.location.href = "index.html"
+            }
+        } else {
+            message.style.color = "red"
+            message.innerText = data.error
+        }
+    } catch(e) {
+        message.style.color = "red"
+        message.innerText = "Chyba s připojením k serveru"
+    }
+})
+</script>
+
+</body>
+</html>

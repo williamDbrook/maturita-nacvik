@@ -1,0 +1,22 @@
+[
+  {
+    "username": "adam",
+    "password": "$2b$10$8kR...",
+    "notes": [
+      {
+        "text": "První poznámka",
+        "important": false,
+        "date": 171000000000
+      },
+      {
+        "text": "Důležitá poznámka",
+        "important": true,
+        "date": 171000010000
+      }
+    ]
+  },
+  {
+    "username": "bigboss",
+    "password": "$2b$10$CDyV/Tp/WLqnsU3ZuVVtOuBIJcuP15UdouaM0X4G69CqO42p30m7u"
+  }
+]
