@@ -14,5 +14,21 @@
         "date": 171000010000
       }
     ]
+  },
+  {
+    "username": "petrrychly",
+    "password": "$2b$10$aTv5TahE9u3q6Iq9CrqKNuLVCrVNLXrsjlBvGz9lm9iipCc3C/sfW",
+    "notes": [
+      {
+        "text": "jsem tak rychlý ",
+        "important": true,
+        "date": 1773664425139
+      },
+      {
+        "text": "jakože opravdu rychlý",
+        "important": false,
+        "date": 1773664432076
+      }
+    ]
   }
 ]

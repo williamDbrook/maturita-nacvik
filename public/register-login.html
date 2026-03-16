@@ -2,22 +2,29 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>Moje poznámky</title>
+<title>Registrace / Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>Moje poznámky</h1>
-<div id="topButtons">
-    <button onclick="toggleImportantFilter()">Zobrazit jen důležité</button>
-    <button onclick="deleteAccount()" style="background:red;color:white;">Smazat účet</button>
-</div>
+<header>
+    <button id="toggleAuth">Přejít na Login</button>
+</header>
 
-<textarea id="noteInput" placeholder="Napiš poznámku..."></textarea><br>
-<button onclick="addNote()">Přidat poznámku</button>
+<h1 id="formTitle">Registrace</h1>
 
-<div id="notes"></div>
+<div id="message" class="message"></div>
 
-<script src="script.js"></script>
+<input id="username" placeholder="Uživatelské jméno">
+
+<input id="password" type="password" placeholder="Heslo">
+
+<button class="submit" id="submitBtn">
+Registrovat
+</button>
+
+<script src="auth.js"></script>
+
 </body>
 </html>
