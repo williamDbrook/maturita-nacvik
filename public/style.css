@@ -1,63 +1,91 @@
-body{
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: auto;
-    padding-top: 20px;
+/* =============================
+   Retro 90s / early 2000s Style
+============================= */
+
+/* Obecné nastavení */
+body {
+    background-color: #f0f0f0; /* světle šedé pozadí */
+    font-family: "Courier New", Courier, monospace; /* pixelový monospace font */
+    color: #000080; /* tmavě modrý text */
+    margin: 0;
+    padding: 0;
 }
-textarea{
-    width:100%;
-    height:80px;
-    margin-top:10px;
+
+header, footer {
+    background-color: #ffcc00; /* žlutý pruh nahoře a dole */
+    color: black;
+    text-align: center;
+    padding: 10px;
+    border-bottom: 3px solid #000080;
+    border-top: 3px solid #000080;
 }
-button{
-    margin-top:10px;
-    cursor:pointer;
+
+/* Formuláře */
+form {
+    background-color: #c0c0c0; /* světle šedé pole */
+    border: 3px inset #000080; /* „inset“ rámeček */
+    padding: 15px;
+    width: 300px;
+    margin: 30px auto;
 }
-.note{
-    border:1px solid #ccc;
-    padding:10px;
-    margin-top:10px;
-    border-radius:5px;
+
+input[type="text"], input[type="password"] {
+    width: 90%;
+    padding: 5px;
+    border: 2px outset #000080;
+    margin-bottom: 10px;
+    font-family: "Courier New", monospace;
 }
-.important{
-    border-left:5px solid red;
-    background:#fff5f5;
+
+/* Tlačítka */
+button {
+    background-color: #008000; /* tmavě zelené */
+    color: #ffffff;
+    font-weight: bold;
+    border: 2px outset #000080;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin: 2px;
+    transition: none; /* žádné moderní hover efekty */
 }
-#topButtons{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:10px;
+
+button:hover {
+    background-color: #00ff00; /* jasně zelená při hover */
 }
-input{
-    width:100%;
-    padding:8px;
-    margin:8px 0;
-    box-sizing:border-box;
+
+/* Poznámky */
+#notes {
+    width: 600px;
+    margin: 20px auto;
 }
-button.submit{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
-    background:#28a745;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
+
+.note {
+    border: 2px solid #000080;
+    background-color: #ffffcc; /* žlutá */
+    padding: 10px;
+    margin-bottom: 10px;
 }
-.message{
-    text-align:center;
-    color:red;
+
+/* Označené jako důležité */
+.note.important {
+    background-color: #ff9999; /* světle červená */
 }
-header{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:20px;
+
+/* Navigační odkazy nahoře */
+.nav {
+    text-align: right;
+    margin: 10px 20px;
 }
-header button{
-    background:#007bff;
-    color:white;
-    border:none;
-    padding:5px 12px;
-    border-radius:5px;
-    cursor:pointer;
+
+.nav button {
+    font-size: 12px;
+}
+
+/* Retro animace – marquee efekt pro název */
+marquee {
+    font-weight: bold;
+    font-size: 18px;
+    color: #ff0000;
+    background-color: #ffff00;
+    padding: 5px;
 }

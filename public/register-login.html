@@ -1,30 +1,58 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<title>Registrace / Login</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Retro Notes – Přihlášení / Registrace</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="auth.js"></script>
 </head>
-
 <body>
 
 <header>
-    <button id="toggleAuth">Přejít na Login</button>
+    <marquee> Retro Notes 2000 </marquee>
 </header>
 
-<h1 id="formTitle">Registrace</h1>
+<div class="nav">
+    <button id="toggleForm">Přepnout na registraci / login</button>
+</div>
 
-<div id="message" class="message"></div>
+<div id="loginForm">
+    <form id="formLogin">
+        <h3>Login</h3>
+        <input type="text" id="loginUsername" placeholder="Uživatelské jméno">
+        <input type="password" id="loginPassword" placeholder="Heslo">
+        <button type="submit">Přihlásit</button>
+    </form>
+</div>
 
-<input id="username" placeholder="Uživatelské jméno">
+<div id="registerForm" style="display:none;">
+    <form id="formRegister">
+        <h3>Registrace</h3>
+        <input type="text" id="regUsername" placeholder="Uživatelské jméno">
+        <input type="password" id="regPassword" placeholder="Heslo">
+        <button type="submit">Registrovat</button>
+    </form>
+</div>
 
-<input id="password" type="password" placeholder="Heslo">
+<footer>
+    Retro Notes &copy; 2000
+</footer>
 
-<button class="submit" id="submitBtn">
-Registrovat
-</button>
+<script>
+const loginForm = document.getElementById("loginForm")
+const registerForm = document.getElementById("registerForm")
+const toggleBtn = document.getElementById("toggleForm")
 
-<script src="auth.js"></script>
+toggleBtn.addEventListener("click", ()=>{
+    if(loginForm.style.display === "none"){
+        loginForm.style.display = "block"
+        registerForm.style.display = "none"
+    }else{
+        loginForm.style.display = "none"
+        registerForm.style.display = "block"
+    }
+})
+</script>
 
 </body>
 </html>

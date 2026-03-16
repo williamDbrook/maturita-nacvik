@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Retro Notes – Moje poznámky</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+
+<header>
+    <marquee>💾 Retro Notes – Tvoje poznámky 💾</marquee>
+</header>
+
+<div class="nav">
+    <button onclick="logout()">Logout</button>
+    <button onclick="toggleImportantFilter()">Filtrovat důležité</button>
+    <button onclick="deleteAccount()">Smazat účet</button>
+</div>
+
+<div id="addNoteSection" style="width: 600px; margin: 20px auto;">
+    <input type="text" id="noteInput" placeholder="Napiš poznámku...">
+    <button onclick="addNote()">Přidat</button>
+</div>
+
+<div id="notes">
+    <!-- Poznámky se načtou skriptem -->
+</div>
+
+<footer>
+    Retro Notes &copy; 2000
+</footer>
+
+</body>
+</html>
