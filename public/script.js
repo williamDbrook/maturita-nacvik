@@ -1,97 +1,64 @@
 let username = localStorage.getItem("username")
+
+// Pokud není přihlášen → redirect na login
 if(!username){
-    alert("Nejprve se přihlašte")
-    window.location.href="register-login.html"
+    console.log("Neplatná session, redirect na login")
+    localStorage.removeItem("username")
+    window.location.href = "/"
 }
 
-let notes=[], showOnlyImportant=false
+let notes = []
+let showOnlyImportant = false
 
 async function loadNotes(){
-    if(!username) return
-    try{
+    try {
         const res = await fetch("/get-notes",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({username})
+            body: JSON.stringify({ username })
         })
-        if(!res.ok){
-            const errData = await res.json().catch(()=>({error:"Neznámá chyba"}))
-            alert("Chyba serveru: "+errData.error)
-            return
-        }
         const data = await res.json()
-        notes = data.notes || []
-        renderNotes()
+        if(data.notes){
+            notes = data.notes
+            renderNotes()
+        } else {
+            console.log("Neplatná session nebo uživatel nenalezen")
+            localStorage.removeItem("username")
+            window.location.href = "/"
+        }
     } catch(e){
-        alert("Chyba s připojením k serveru")
+        console.log("Chyba při načítání poznámek", e)
     }
 }
 
 async function addNote(){
-    if(!username) return
     const text = document.getElementById("noteInput").value
     if(!text.trim()) return
-    try{
-        const res = await fetch("/add-note",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({username,text})
-        })
-        if(!res.ok){
-            const errData = await res.json().catch(()=>({error:"Neznámá chyba"}))
-            alert("Chyba: "+errData.error)
-            return
-        }
-        const data = await res.json()
-        if(data.message){
-            document.getElementById("noteInput").value=""
-            await loadNotes()
-        } else alert(data.error)
-    } catch(e){
-        alert("Chyba s připojením k serveru")
-    }
+    await fetch("/add-note",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ username, text })
+    })
+    document.getElementById("noteInput").value=""
+    loadNotes()
 }
 
 async function deleteNote(index){
-    if(!username) return
-    try{
-        const res = await fetch("/delete-note",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({username,noteIndex:index})
-        })
-        if(!res.ok){
-            const errData = await res.json().catch(()=>({error:"Neznámá chyba"}))
-            alert("Chyba: "+errData.error)
-            return
-        }
-        const data = await res.json()
-        if(data.message) await loadNotes()
-        else alert(data.error)
-    } catch(e){
-        alert("Chyba s připojením k serveru")
-    }
+    await fetch("/delete-note",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ username, noteIndex:index })
+    })
+    loadNotes()
 }
 
 async function toggleImportant(index){
-    if(!username) return
-    try{
-        const res = await fetch("/toggle-important",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({username,noteIndex:index})
-        })
-        if(!res.ok){
-            const errData = await res.json().catch(()=>({error:"Neznámá chyba"}))
-            alert("Chyba: "+errData.error)
-            return
-        }
-        const data = await res.json()
-        if(data.message) await loadNotes()
-        else alert(data.error)
-    } catch(e){
-        alert("Chyba s připojením k serveru")
-    }
+    await fetch("/toggle-important",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ username, noteIndex:index })
+    })
+    loadNotes()
 }
 
 function toggleImportantFilter(){
@@ -101,50 +68,57 @@ function toggleImportantFilter(){
 
 function renderNotes(){
     const container = document.getElementById("notes")
-    container.innerHTML=""
-    let displayNotes = [...notes]
-    if(showOnlyImportant) displayNotes = displayNotes.filter(n=>n.important)
-    displayNotes.sort((a,b)=>b.date-a.date)
-    displayNotes.forEach((note,index)=>{
+    container.innerHTML = ""
+
+    let display = [...notes]
+    if(showOnlyImportant) display = display.filter(n=>n.important)
+    display.sort((a,b)=>b.date-a.date)
+
+    display.forEach((note,index)=>{
         const div = document.createElement("div")
-        div.className="note"
+        div.className = "note"
         if(note.important) div.classList.add("important")
-        div.innerHTML=`
-            <p>${note.text}</p>
-            <button onclick="toggleImportant(${index})">${note.important?"Odebrat důležité":"Označit důležité"}</button>
-            <button onclick="deleteNote(${index})">Smazat</button>
+
+        div.innerHTML = `
+        <p>${note.text}</p>
+        <button onclick="toggleImportant(${index})">
+        ${note.important ? "Odebrat důležité" : "Označit důležité"}
+        </button>
+        <button onclick="deleteNote(${index})">Smazat</button>
         `
         container.appendChild(div)
     })
 }
 
+// Delete account a redirect na login
 async function deleteAccount(){
-    if(!username) return
-    const password = prompt("Pro potvrzení zadejte své heslo:")
-    if(!password || !password.trim()){
-        alert("Účet nebyl smazán, heslo je povinné.")
-        return
-    }
+    const password = prompt("Zadejte heslo pro smazání účtu")
+    if(!password) return
+
     try{
         const res = await fetch("/delete-account",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({username,password})
+            body: JSON.stringify({ username, password })
         })
-        if(!res.ok){
-            const errData = await res.json().catch(()=>({error:"Neznámá chyba"}))
-            alert("Chyba: "+errData.error)
-            return
-        }
         const data = await res.json()
         if(data.message){
-            alert("Účet smazán. Budete přesměrováni na registraci.")
+            alert("Účet smazán")
             localStorage.removeItem("username")
-            window.location.href="register-login.html"
-        } else alert(data.error)
-    } catch(e){
-        alert("Chyba s připojením k serveru")
+            window.location.href="/"
+        }else{
+            alert(data.error)
+        }
+    }catch(e){
+        alert("Chyba serveru")
     }
 }
 
+// Logout tlačítko
+function logout(){
+    localStorage.removeItem("username")
+    window.location.href="/"
+}
+
+// Načti poznámky při startu
 loadNotes()

@@ -1,50 +1,60 @@
-const toggleBtn = document.getElementById("toggleAuth")
-const formTitle = document.getElementById("formTitle")
-const submitBtn = document.getElementById("submitBtn")
-const message = document.getElementById("message")
+// Přepínání mezi login a registrací
+const loginForm = document.getElementById("login-form")
+const registerForm = document.getElementById("register-form")
+const showLoginBtn = document.getElementById("show-login")
+const showRegisterBtn = document.getElementById("show-register")
 
-let isRegister = true
-
-toggleBtn.addEventListener("click", () => {
-    isRegister = !isRegister
-    formTitle.innerText = isRegister ? "Registrace" : "Login"
-    submitBtn.innerText = isRegister ? "Registrovat" : "Přihlásit se"
-    toggleBtn.innerText = isRegister ? "Přejít na Login" : "Přejít na Registraci"
-    message.innerText = ""
-    message.style.color="red"
+showLoginBtn.addEventListener("click", () => {
+    loginForm.style.display = "block"
+    registerForm.style.display = "none"
 })
 
-submitBtn.addEventListener("click", async () => {
-    const username = document.getElementById("username").value
-    const password = document.getElementById("password").value
-    if(!username || !password){
-        message.innerText="Vyplňte všechny údaje"
-        return
-    }
+showRegisterBtn.addEventListener("click", () => {
+    loginForm.style.display = "none"
+    registerForm.style.display = "block"
+})
 
-    const endpoint = isRegister ? "/register" : "/login"
-    try{
-        const res = await fetch(endpoint,{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({username,password})
+// LOGIN
+document.getElementById("login-btn").addEventListener("click", async () => {
+    const username = document.getElementById("login-username").value.trim()
+    const password = document.getElementById("login-password").value.trim()
+    if(!username || !password) return alert("Vyplň všechny údaje!")
+
+    try {
+        const res = await fetch("/login", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ username, password })
         })
         const data = await res.json()
         if(data.message){
-            if(isRegister){
-                message.style.color="green"
-                message.innerText="Registrace úspěšná! Přihlašte se."
-                toggleBtn.click()
-            } else {
-                localStorage.setItem("username", username)
-                window.location.href="index.html"
-            }
-        } else {
-            message.style.color="red"
-            message.innerText = data.error
-        }
+            localStorage.setItem("username", username)
+            window.location.href = "/notes"
+        } else alert(data.error)
     } catch(e){
-        message.style.color="red"
-        message.innerText="Chyba s připojením k serveru"
+        alert("Chyba serveru")
+    }
+})
+
+// REGISTER
+document.getElementById("register-btn").addEventListener("click", async () => {
+    const username = document.getElementById("register-username").value.trim()
+    const password = document.getElementById("register-password").value.trim()
+    if(!username || !password) return alert("Vyplň všechny údaje!")
+
+    try {
+        const res = await fetch("/register", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ username, password })
+        })
+        const data = await res.json()
+        if(data.message){
+            alert("Uživatel vytvořen, nyní se přihlaste")
+            loginForm.style.display = "block"
+            registerForm.style.display = "none"
+        } else alert(data.error)
+    } catch(e){
+        alert("Chyba serveru")
     }
 })

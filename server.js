@@ -1,9 +1,9 @@
 const express = require("express")
-const fs = require("fs")
 const bcrypt = require("bcrypt")
 const cors = require("cors")
 const path = require("path")
 const open = require("open").default
+const mongoose = require("mongoose")
 
 const app = express()
 const PORT = 3000
@@ -11,180 +11,192 @@ const PORT = 3000
 app.use(express.json())
 app.use(cors())
 
-const USERS_FILE = "users.json"
+// --------------------
+// MONGODB CONNECTION
+// --------------------
+mongoose.connect(
+  "mongodb+srv://WDB-DEV:26102Oo6_.@matura-test.sxnalj4.mongodb.net/?appName=matura-test"
+)
+mongoose.connection.on("connected", () => {
+  console.log("[INFO] MongoDB connected")
+})
+mongoose.connection.on("error", (err) => {
+  console.error("[ERROR] MongoDB connection error:", err)
+})
 
 // --------------------
-// Pomocné funkce
+// USER MODEL
 // --------------------
-function loadUsers(){
-    if(!fs.existsSync(USERS_FILE)) return []
-    return JSON.parse(fs.readFileSync(USERS_FILE))
-}
-
-function saveUsers(users){
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users,null,2))
-}
+const UserSchema = new mongoose.Schema({
+  username: { type: String, unique: true },
+  password: String,
+  notes: [
+    {
+      text: String,
+      important: Boolean,
+      date: Number
+    }
+  ]
+})
+const User = mongoose.model("User", UserSchema)
 
 // --------------------
-// API
+// API ROUTES
 // --------------------
 
-app.post("/register", async (req,res)=>{
-    const {username,password}=req.body
-    if(!username || !password)
-        return res.status(400).json({error:"Missing data"})
+// registrace
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body
+  console.log(`[${new Date().toISOString()}] POST /register`, req.body)
 
-    const users=loadUsers()
+  if (!username || !password) return res.status(400).json({ error: "Missing data" })
 
-    if(users.find(u=>u.username===username))
-        return res.status(400).json({error:"Username already exists"})
+  const existing = await User.findOne({ username })
+  if (existing) {
+    console.log(`[WARN] Username already exists: ${username}`)
+    return res.status(400).json({ error: "Username already exists" })
+  }
 
-    const hash=await bcrypt.hash(password,10)
-
-    users.push({
-        username,
-        password:hash,
-        notes:[]
-    })
-
-    saveUsers(users)
-
-    res.json({message:"User created"})
+  const hash = await bcrypt.hash(password, 10)
+  const user = new User({ username, password: hash, notes: [] })
+  await user.save()
+  console.log(`[INFO] User created: ${username}`)
+  res.json({ message: "User created" })
 })
 
-app.post("/login", async (req,res)=>{
-    const {username,password}=req.body
+// login
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body
+  console.log(`[${new Date().toISOString()}] POST /login`, req.body)
 
-    const users=loadUsers()
-    const user=users.find(u=>u.username===username)
+  const user = await User.findOne({ username })
+  if (!user) {
+    console.log(`[WARN] User not found: ${username}`)
+    return res.status(400).json({ error: "User not found" })
+  }
 
-    if(!user)
-        return res.status(400).json({error:"User not found"})
+  const match = await bcrypt.compare(password, user.password)
+  if (!match) {
+    console.log(`[WARN] Wrong password for: ${username}`)
+    return res.status(400).json({ error: "Wrong password" })
+  }
 
-    const match=await bcrypt.compare(password,user.password)
-
-    if(!match)
-        return res.status(400).json({error:"Wrong password"})
-
-    res.json({message:"Login success"})
+  console.log(`[INFO] Login success for: ${username}`)
+  res.json({ message: "Login success" })
 })
 
-app.post("/get-notes",(req,res)=>{
-    const {username}=req.body
+// získání poznámek
+app.post("/get-notes", async (req, res) => {
+  const { username } = req.body
+  console.log(`[${new Date().toISOString()}] POST /get-notes`, req.body)
 
-    const users=loadUsers()
-    const user=users.find(u=>u.username===username)
+  const user = await User.findOne({ username })
+  if (!user) {
+    console.log(`[WARN] User not found for get-notes: ${username}`)
+    return res.status(400).json({ error: "User not found" })
+  }
 
-    if(!user)
-        return res.status(400).json({error:"User not found"})
-
-    res.json({notes:user.notes})
+  console.log(`[INFO] Returning ${user.notes.length} notes for user: ${username}`)
+  res.json({ notes: user.notes })
 })
 
-app.post("/add-note",(req,res)=>{
-    const {username,text}=req.body
+// přidání poznámky
+app.post("/add-note", async (req, res) => {
+  const { username, text } = req.body
+  console.log(`[${new Date().toISOString()}] POST /add-note`, req.body)
 
-    const users=loadUsers()
-    const user=users.find(u=>u.username===username)
+  const user = await User.findOne({ username })
+  if (!user) {
+    console.log(`[WARN] User not found for add-note: ${username}`)
+    return res.status(400).json({ error: "User not found" })
+  }
 
-    if(!user)
-        return res.status(400).json({error:"User not found"})
-
-    user.notes.push({
-        text,
-        important:false,
-        date:Date.now()
-    })
-
-    saveUsers(users)
-
-    res.json({message:"Note added"})
+  user.notes.push({ text, important: false, date: Date.now() })
+  await user.save()
+  console.log(`[INFO] Note added for user: ${username}`)
+  res.json({ message: "Note added" })
 })
 
-app.post("/delete-note",(req,res)=>{
-    const {username,noteIndex}=req.body
+// smazání poznámky
+app.post("/delete-note", async (req, res) => {
+  const { username, noteIndex } = req.body
+  console.log(`[${new Date().toISOString()}] POST /delete-note`, req.body)
 
-    const users=loadUsers()
-    const user=users.find(u=>u.username===username)
+  const user = await User.findOne({ username })
+  if (!user) {
+    console.log(`[WARN] User not found for delete-note: ${username}`)
+    return res.status(400).json({ error: "User not found" })
+  }
 
-    if(!user)
-        return res.status(400).json({error:"User not found"})
-
-    user.notes.splice(noteIndex,1)
-
-    saveUsers(users)
-
-    res.json({message:"Note deleted"})
+  user.notes.splice(noteIndex, 1)
+  await user.save()
+  console.log(`[INFO] Note deleted for user: ${username}`)
+  res.json({ message: "Note deleted" })
 })
 
-app.post("/toggle-important",(req,res)=>{
-    const {username,noteIndex}=req.body
+// toggle důležitosti poznámky
+app.post("/toggle-important", async (req, res) => {
+  const { username, noteIndex } = req.body
+  console.log(`[${new Date().toISOString()}] POST /toggle-important`, req.body)
 
-    const users=loadUsers()
-    const user=users.find(u=>u.username===username)
+  const user = await User.findOne({ username })
+  if (!user) {
+    console.log(`[WARN] User not found for toggle-important: ${username}`)
+    return res.status(400).json({ error: "User not found" })
+  }
 
-    if(!user)
-        return res.status(400).json({error:"User not found"})
-
-    user.notes[noteIndex].important=!user.notes[noteIndex].important
-
-    saveUsers(users)
-
-    res.json({message:"Note updated"})
+  user.notes[noteIndex].important = !user.notes[noteIndex].important
+  await user.save()
+  console.log(`[INFO] Note importance toggled for user: ${username}`)
+  res.json({ message: "Note updated" })
 })
 
-app.post("/delete-account", async (req,res)=>{
-    const {username,password}=req.body
+// smazání účtu
+app.post("/delete-account", async (req, res) => {
+  const { username, password } = req.body
+  console.log(`[${new Date().toISOString()}] POST /delete-account`, req.body)
 
-    const users=loadUsers()
-    const index=users.findIndex(u=>u.username===username)
+  const user = await User.findOne({ username })
+  if (!user) {
+    console.log(`[WARN] User not found for delete-account: ${username}`)
+    return res.status(400).json({ error: "User not found" })
+  }
 
-    if(index===-1)
-        return res.status(400).json({error:"User not found"})
+  const match = await bcrypt.compare(password, user.password)
+  if (!match) {
+    console.log(`[WARN] Wrong password for delete-account: ${username}`)
+    return res.status(400).json({ error: "Wrong password" })
+  }
 
-    const match=await bcrypt.compare(password,users[index].password)
-
-    if(!match)
-        return res.status(400).json({error:"Wrong password"})
-
-    users.splice(index,1)
-
-    saveUsers(users)
-
-    res.json({message:"Account deleted"})
+  await User.deleteOne({ username })
+  console.log(`[INFO] Account deleted for user: ${username}`)
+  res.json({ message: "Account deleted" })
 })
-
 
 // --------------------
 // STATIC FILES
 // --------------------
-
-app.use(express.static(path.join(__dirname,"public")))
-
+app.use(express.static(path.join(__dirname, "public")))
 
 // --------------------
 // ROUTING
 // --------------------
-
-// LOGIN PAGE
-app.get("/",(req,res)=>{
-    res.sendFile(path.join(__dirname,"public","register-login.html"))
+app.get("/", (req, res) => {
+  console.log(`[INFO] GET / → register-login.html`)
+  res.sendFile(path.join(__dirname, "public", "register-login.html"))
 })
 
-// NOTES PAGE
-app.get("/notes",(req,res)=>{
-    res.sendFile(path.join(__dirname,"public","index.html"))
+app.get("/notes", (req, res) => {
+  console.log(`[INFO] GET /notes → notes.html`)
+  res.sendFile(path.join(__dirname, "public", "notes.html"))
 })
-
 
 // --------------------
 // START SERVER
 // --------------------
-
-app.listen(PORT,()=>{
-    const url=`http://localhost:${PORT}`
-    console.log("Server running on port",PORT)
-    console.log("Open:",url)
-
-    open(url)
+app.listen(PORT, () => {
+  const url = `http://localhost:${PORT}`
+  console.log(`[INFO] Server running on port ${PORT}`)
+  console.log(`[INFO] Open: ${url}`)
+  open(url)
 })
