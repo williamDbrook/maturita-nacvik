@@ -8,6 +8,7 @@
 </head>
 <body>
 
+<main>
 <header>
     <marquee> Retro Notes 2000 </marquee>
 </header>
@@ -16,34 +17,33 @@
     <button id="toggleForm">Přepnout na registraci / login</button>
 </div>
 
-<div id="loginForm">
-    <form id="formLogin">
+<div id="login-form">
+    <form>
         <h3>Login</h3>
-        <input type="text" id="loginUsername" placeholder="Uživatelské jméno">
-        <input type="password" id="loginPassword" placeholder="Heslo">
-        <button type="submit">Přihlásit</button>
+        <input type="text" id="login-username" placeholder="Uživatelské jméno">
+        <input type="password" id="login-password" placeholder="Heslo">
+        <button type="button" id="login-btn">Přihlásit</button>
     </form>
 </div>
 
-<div id="registerForm" style="display:none;">
-    <form id="formRegister">
+<div id="register-form" style="display:none;">
+    <form>
         <h3>Registrace</h3>
-        <input type="text" id="regUsername" placeholder="Uživatelské jméno">
-        <input type="password" id="regPassword" placeholder="Heslo">
-        <button type="submit">Registrovat</button>
+        <input type="text" id="register-username" placeholder="Uživatelské jméno">
+        <input type="password" id="register-password" placeholder="Heslo">
+        <button type="button" id="register-btn">Registrovat</button>
     </form>
 </div>
 
 <footer>
     Retro Notes &copy; 2000
 </footer>
+</main>
 
 <script>
-const loginForm = document.getElementById("loginForm")
-const registerForm = document.getElementById("registerForm")
-const toggleBtn = document.getElementById("toggleForm")
-
-toggleBtn.addEventListener("click", ()=>{
+document.getElementById("toggleForm").addEventListener("click", ()=>{
+    const loginForm = document.getElementById("login-form")
+    const registerForm = document.getElementById("register-form")
     if(loginForm.style.display === "none"){
         loginForm.style.display = "block"
         registerForm.style.display = "none"

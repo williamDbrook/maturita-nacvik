@@ -70,21 +70,23 @@ function renderNotes(){
     const container = document.getElementById("notes")
     container.innerHTML = ""
 
-    let display = [...notes]
-    if(showOnlyImportant) display = display.filter(n=>n.important)
-    display.sort((a,b)=>b.date-a.date)
+    let display = notes.map((note, originalIndex) => ({ note, originalIndex }))
+    if(showOnlyImportant) display = display.filter(item=>item.note.important)
+    display.sort((a,b)=>b.note.date-a.note.date)
 
-    display.forEach((note,index)=>{
+    display.forEach((item)=>{
+        const note = item.note
+        const originalIndex = item.originalIndex
         const div = document.createElement("div")
         div.className = "note"
         if(note.important) div.classList.add("important")
 
         div.innerHTML = `
         <p>${note.text}</p>
-        <button onclick="toggleImportant(${index})">
+        <button onclick="toggleImportant(${originalIndex})">
         ${note.important ? "Odebrat důležité" : "Označit důležité"}
         </button>
-        <button onclick="deleteNote(${index})">Smazat</button>
+        <button onclick="deleteNote(${originalIndex})">Smazat</button>
         `
         container.appendChild(div)
     })

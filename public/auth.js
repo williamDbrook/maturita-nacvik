@@ -1,19 +1,3 @@
-// Přepínání mezi login a registrací
-const loginForm = document.getElementById("login-form")
-const registerForm = document.getElementById("register-form")
-const showLoginBtn = document.getElementById("show-login")
-const showRegisterBtn = document.getElementById("show-register")
-
-showLoginBtn.addEventListener("click", () => {
-    loginForm.style.display = "block"
-    registerForm.style.display = "none"
-})
-
-showRegisterBtn.addEventListener("click", () => {
-    loginForm.style.display = "none"
-    registerForm.style.display = "block"
-})
-
 // LOGIN
 document.getElementById("login-btn").addEventListener("click", async () => {
     const username = document.getElementById("login-username").value.trim()
