@@ -15,7 +15,7 @@ app.use(cors())
 // MONGODB CONNECTION
 // --------------------
 mongoose.connect(
-  "mongodb+srv://WDB-DEV:26102Oo6_.@matura-test.sxnalj4.mongodb.net/?appName=matura-test"
+  "mongodb+srv://usrname:passwd@matura-test.sxnalj4.mongodb.net/?appName=matura-test"
 )
 mongoose.connection.on("connected", () => {
   console.log("[INFO] MongoDB connected")
